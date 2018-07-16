@@ -1,12 +1,14 @@
 #include<iostream>
 #include<bits/stdc++.h>
 using namespace std;
-void compare(vector<int> a, vector<int> b,vector<int > *adj,int v,int orgi,int neighbour)
+int c=0; //global variable for counting edges
+void compare(vector<long long int> a, vector<long long int> b,vector<long long int > *adj,long long int  v,long long int orgi,long long int neighbour)
 {
+	cout<<"hai"<<endl;
 	int fl=0;
-	for(int i=0;i<a.size();i++)
+	for(long long int i=0;i<a.size();i++)
 	{
-		for(int j=0;j<b.size();j++)
+		for(long long int j=0;j<b.size();j++)
 		{
 						if(a[i]==b[j])
 						{
@@ -16,9 +18,12 @@ void compare(vector<int> a, vector<int> b,vector<int > *adj,int v,int orgi,int n
 						
 						if(fl>=2)
 						{
+							cout<<"hai inner"<<endl;
 							adj[orgi].push_back(neighbour);
 							adj[neighbour].push_back(orgi);
 							fl=0;
+							c++;
+							break;
 							
 						}
 					}
@@ -37,7 +42,7 @@ int findType(int element_type)
 		case 3: return 2;
 		case 5: return 3;
 		case 9: return 4;
-		case 10:return 5;
+		case 10:return 4;
 		case 12:return 6;
 		default: return 0;
 	}
@@ -46,17 +51,17 @@ int findType(int element_type)
 
 int main()
 {
-	ifstream input("input1.su2");
+	ifstream input("bigger.su2");
 	ofstream output("output.txt");
 	string st1,st2;
-	int v,e,d,element_type;
+	long long int v,e,d,element_type;
 	input>>st1>>d; //reading string and numerical value in first line.
 	cout<<"diamension "<<d<<endl;
 	input>>st2>>v; //reading second line
-	vector<int> *mesh=new vector<int> [v];
-	int data;
-	vector<int> *adj=new vector<int> [v];
-	output<<v<<endl;
+	vector<long long int> *mesh=new vector<long long int> [v];
+	long long int data;
+	vector<long long int> *adj=new vector<long long int> [v];
+	output<<v<<" ";
 
 	// cout<<st1;
 	input>>element_type; //finding which type of element and its value
@@ -64,10 +69,12 @@ int main()
 	int tp=re;
 	int fl=0;
 	int n1,n2;
+
 	for(int i=0;i<v;i++)
 	{
 		adj[i].push_back(0);
 	}
+	
 	for(int i=0;i<v;i++)
 	{
 		while(re--)
@@ -75,9 +82,10 @@ int main()
 			input>>data; //reading index of vertex of an element
 			mesh[i].push_back(data);
 		}
-		input>>n1>>n2; // avoiding last value(element number) and first value from next line(element id)
+		input>>n1; // avoiding last value(element number) and first value from next line(element id)
 		re=tp; //reintializing no.of vertices
 	}
+
 	// for(int i=0;i<v;i++)    //printing vertices of each element
 	// {
 	// 	cout<<i<<"->";
@@ -85,24 +93,27 @@ int main()
 	// 		cout<<mesh[i][j]<<" ";
 	// 	cout<<endl;
 	// }
-	for(int i=0;i<v;i++)
+	for(long long int i=0;i<v;i++)
 	{
-		for(int j=i+1;j<v;j++)
+		for(long long int j=i+1;j<v;j++)
 			{
+				
 				compare(mesh[i],mesh[j],adj,v,i,j);
 			}	
 	}
-	int count=0;
-	for(int i=0;i<v;i++)
+
+	// int count=0;
+	output<<c<<endl; //writtimg no of edges to file.
+	for(long long int i=0;i<v;i++)
 	{
 
 		//writing to file result
 		cout<<i<<"->";
 		output<<i<<" ";
-		for(int j=1;j<adj[i].size();j++)
+		for(long long int j=1;j<adj[i].size();j++)
 		{
 			cout<<adj[i][j]<<" ";
-			int k=adj[i][j];
+			long long int k=adj[i][j];
 			output<<k<<" ";
 
 		}
