@@ -7,62 +7,68 @@ int c=0;
 void compare(vector<long long int> a, vector<long long int> b,vector<long long int > *adj,long long int  v,long long int orgi,long long int neighbour)
 {
 	cout<<"hai"<<endl;
+	
 	int fl=0;
-	map<long long int,long long int> m;
+
+
+	// map<long long int,long long int> m;
 
 
 	int t = 0;
-	vector<long long int>::iterator it;
-	for(it = a.begin(); it != a.end(); it++)
-		m[(*it)] += 1;
-	for(it = b.begin(); it != b.end(); it++)
-	{
-		if(m[(*it)] > 0)
-		{
-			t += 1;
-			m[(*it)] -= 1;
-		}
-		if(t >= 2)
-		{
-							adj[orgi].push_back(neighbour);
-							adj[neighbour].push_back(orgi);
-							fl=0;
-							c++;
-							break;
-		}
-	}
 
 
 
-
-
-
-
-
-
-
-	// for(long long int i=0;i<a.size();i++)
+	// vector<long long int>::iterator it;
+	// for(it = a.begin(); it != a.end(); it++)
+	// 	m[(*it)] += 1;
+	// for(it = b.begin(); it != b.end(); it++)
 	// {
-	// 	for(long long int j=0;j<b.size();j++)
+	// 	if(m[(*it)] > 0)
 	// 	{
-	// 					if(a[i]==b[j])
-	// 					{
-		
-	// 						fl+=1;
-	// 					}
-						
-	// 					if(fl>=2)
-	// 					{
-	// 						cout<<"hai inner"<<endl;
+	// 		t += 1;
+	// 		m[(*it)] -= 1;
+	// 	}
+	// 	if(t >= 2)
+	// 	{
 	// 						adj[orgi].push_back(neighbour);
 	// 						adj[neighbour].push_back(orgi);
 	// 						fl=0;
 	// 						c++;
 	// 						break;
-							
-	// 					}
-	// 				}
+	// 	}
 	// }
+
+
+
+
+
+
+
+
+
+
+	for(long long int i=0;i<a.size();i++)
+	{
+		for(long long int j=0;j<b.size();j++)
+		{
+						if(a[i]==b[j])
+						{
+		
+							fl+=1;
+						}
+						
+						if(fl>=2)
+						{
+							cout<<"hai inner"<<endl;
+							adj[orgi].push_back(neighbour);
+							adj[neighbour].push_back(orgi);
+							fl=0;
+							c++;
+							break;
+							
+						}
+					}
+	}
 			
 }
 
