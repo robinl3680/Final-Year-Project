@@ -7,18 +7,20 @@
 #include<sstream>
 
 
-#define MAX 	100000
-#define CORES 	4
+#define MAX 	  100000
+#define CORES 	  4
+#define ADJ_MAX   10
+#define GHOST_MAX 100000
 
 using namespace std;
 
-// Structure used for storing vertex.
+//Structure used for storing vertex.
 struct vertex
 {
 	int vertex_no;
 	int data;
 
-	int adj[MAX];
+	int adj[ADJ_MAX];
 	int adj_size;
 
 };
@@ -53,7 +55,7 @@ int main(int args, char **argv)
 	//Define MPI type for struct.
 
 	const int nitems      = 4;
-    int blocklengths[4]   = {1,1,MAX+1,1};
+    int blocklengths[4]   = {1,1,ADJ_MAX+1,1};
     MPI_Datatype types[4] = {MPI_INT, MPI_INT , MPI_INT , MPI_INT};
     MPI_Datatype mpi_vertex_type;
     MPI_Aint     offsets[4];
@@ -120,6 +122,28 @@ int main(int args, char **argv)
 		{
 			MPI_Send(&v_node,1,mpi_vertex_type,i+1,0,MPI_COMM_WORLD);
 		}
+
+		//To send data of ghost vertices.
+
+		int R[GHOST_MAX+1];
+		MPI_Status status;
+
+		for(int i = 1 ; i < CORES ; i++)
+		{
+
+			int ierr = MPI_Recv(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD , &status);	//Receiving request from each of the other core.
+
+			if(ierr == MPI_SUCCESS)
+			{
+
+
+				for(int i = 1 ; i <= R[0] ; i++)
+					R[i] = vertex_data[R[i]];	//Storing the vertex data of ghost.
+
+				MPI_Send(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD);	//Send back the response.
+			}
+
+		}
 			
 			
 	}
@@ -151,12 +175,49 @@ int main(int args, char **argv)
 
 			}
 		}
-		for(auto it: sub_graph)
+
+		//To find ghosts in partition.
+
+		for(auto it:sub_graph)
 		{
-			cout << it.first << " Adjacent are : ";
-			for(auto it1 : it.second)
-				cout << it1 << " ";
-			cout << endl;
+			for(auto it1:it.second)
+			{	
+
+				if(sub_graph.find(it1) == sub_graph.end())
+					ghosts.insert(it1);
+			}
+		}
+
+		//To request data of ghost vertices.
+
+		int R[GHOST_MAX+1];
+		int i = 1;
+
+		R[0] = ghosts.size();	//Request-array[0] stores sizeof ghosts.
+
+		for(auto it: ghosts)
+			R[i++] = it;	//Filling the array with ghosts.
+
+		MPI_Send(&R , GHOST_MAX+1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD);	//Sending request for getting ghost vertex data.
+
+		int ierr = MPI_Recv(&R , GHOST_MAX+1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD , &status); //Receiving ghost data.
+
+		if(ierr == MPI_SUCCESS){
+			int i = 1;
+
+			for(auto it : ghosts)
+				data_map[it] = R[i++];	//insert ghost data to data_map.
+		}
+
+
+
+		//Printing the ghosts and their data associated with each core.
+
+		cout << "ghosts in processor " << rank << " : \n";
+
+		for(auto it : ghosts){
+
+			cout << it << " : " << data_map[it] << endl;
 		}
 
 	}
