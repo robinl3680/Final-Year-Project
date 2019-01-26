@@ -111,7 +111,7 @@ int main(int args, char **argv)
 				v_node.adj_size++;						//Storing the adjacency list.
 			}
 
-			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD); //Send each vertex to of partition to curresponding core.
+			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD); //Send each vertex of partition to curresponding core.
 
 		}
 
@@ -137,8 +137,8 @@ int main(int args, char **argv)
 			{
 
 
-				for(int i = 1 ; i <= R[0] ; i++)
-					R[i] = vertex_data[R[i]];	//Storing the vertex data of ghost.
+				for(int j = 1 ; j <= R[0] ; j++)
+					R[j] = vertex_data[R[j]];	//Storing the vertex data of ghost.
 
 				MPI_Send(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD);	//Send back the response.
 			}
@@ -147,6 +147,11 @@ int main(int args, char **argv)
 			
 			
 	}
+
+
+
+
+
 	if(rank != 0)
 	{
 		vertex v_node;
@@ -217,7 +222,7 @@ int main(int args, char **argv)
 
 		for(auto it : ghosts){
 
-			cout << it << " : " << data_map[it] << endl;
+			cout << it << " : data : " << data_map[it] << endl;
 		}
 
 	}
