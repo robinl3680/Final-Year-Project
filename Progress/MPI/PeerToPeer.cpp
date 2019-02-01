@@ -81,7 +81,11 @@ int main(int args, char **argv)
 		vector<int> vertex_data(v+1); //To store data in each vertex.
 
 
-		
+		vector<vertex> sub_graph;
+
+		map<int,vector<int>> sub;
+
+		set<int> ghost;
 
 		for(int i = 1 ; i <= v ; i++)
 		{
@@ -101,7 +105,7 @@ int main(int args, char **argv)
 
 			stringstream ss(gph);
 
-			vector<vertex> sub_graph;
+			
 
 			if(partition[i] == rank)
 			{
@@ -113,27 +117,33 @@ int main(int args, char **argv)
 				while(ss >> temp2) //String stream for accessing each vertex in that line.
 				{
 					v_node.adj[v_node.adj_size] = temp2;
-					v_node.adj_size++;						//Storing the adjacency list.
+					v_node.adj_size++;
+					sub[v_node.vertex_no].push_back(temp2);					//Storing the adjacency list.
 				}
 				sub_graph.push_back(v_node);
 
 				//Printing the subgraph peer to peer
 
-				cout << "hai iam " << rank << endl;
-				for(int i = 0; i < sub_graph.size(); i++)
-				{
-					cout << sub_graph[i].vertex_no << endl;
-					for(int j = 0; j < sub_graph[i].adj_size; j++)
-					{
-						cout << sub_graph[i].adj[j] << " ";
-					}
-					cout << endl;
-				}
-
 			}
 
 			// MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD); //Send each vertex of partition to curresponding core.
 		}
+		for(auto it:sub)
+		{
+			for(auto it1:it.second)
+				{
+					if(sub.find(it1) == sub.end())
+						ghost.insert(it1);
+				}
+		}
+
+		cout << "iam " << rank << endl;
+		for(auto it:ghost)
+		{
+			cout << it << " ";
+		}
+		cout << endl;
+
 
 	MPI_Finalize();
 	return 0;
