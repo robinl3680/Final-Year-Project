@@ -85,7 +85,11 @@ int main(int args, char **argv)
 
 		map<int,vector<int>> sub;
 
+		map<int,vector<int>> to_peer;
+
 		set<int> ghost;
+
+
 
 		for(int i = 1 ; i <= v ; i++)
 		{
@@ -130,7 +134,7 @@ int main(int args, char **argv)
 		}
 		for(auto it:sub)
 		{
-			for(auto it1:it.second)
+			for(auto it1 : it.second)
 				{
 					if(sub.find(it1) == sub.end())
 						ghost.insert(it1);
@@ -143,7 +147,54 @@ int main(int args, char **argv)
 			cout << it << " ";
 		}
 		cout << endl;
+		for(auto it : ghost)
+		{
+			to_peer[partition[it]].push_back(it);
+		}
 
+		for(auto it : to_peer)
+		{
+			// cout << rank << " have ";
+			// cout << it.first << endl;
+
+			int sample_arr[it.second.size()];
+
+			int send_size = it.second.size();
+			sample_arr[0] = send_size;
+
+			int i = 1;
+
+			for(auto it1 : it.second)
+			{
+				sample_arr[i++] = it1;
+			}
+			// for(int j = 0; j < it.second.size(); j++)
+			// {
+			// 	cout << " have adjacent as " << sample_arr[j] << " ";
+			// }
+			// cout << endl;
+
+			MPI_Send(&sample_arr , GHOST_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD);
+		}
+
+		int sample_recv[GHOST_MAX];
+		MPI_Status status;
+
+		if(rank >= 0)
+		{
+			int ierr = MPI_Recv(&sample_recv , GHOST_MAX , MPI_INT , MPI_ANY_SOURCE , 0 , MPI_COMM_WORLD , &status);
+
+
+			if(ierr == MPI_SUCCESS)
+			{
+						for(int j = 1 ; j < sample_recv[0]; j++)
+						{
+							cout << " am " << " recieved ";
+							cout << sample_recv[j] << " ";
+						}
+						cout <<  endl;
+			}
+		}
 
 	MPI_Finalize();
 	return 0;
