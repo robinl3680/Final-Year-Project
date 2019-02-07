@@ -11,6 +11,7 @@
 #define CORES 	  4
 #define ADJ_MAX   10
 #define GHOST_MAX 100000
+#define G_MAX 100
 
 using namespace std;
 
@@ -129,9 +130,12 @@ int main(int args, char **argv)
 				//Printing the subgraph peer to peer
 
 			}
-
-			// MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD); //Send each vertex of partition to curresponding core.
 		}
+
+
+		// Map method to find the ghost
+
+
 		for(auto it:sub)
 		{
 			for(auto it1 : it.second)
@@ -141,23 +145,28 @@ int main(int args, char **argv)
 				}
 		}
 
-		cout << "iam " << rank << endl;
-		for(auto it:ghost)
-		{
-			cout << it << " ";
-		}
-		cout << endl;
+
+		// cout << "iam " << rank << endl;
+		// for(auto it:ghost)
+		// {
+		// 	cout << it << " ";
+		// }
+
+
+		//to_peer is a map to pack the ghost curresponding to a core together.
+
+
 		for(auto it : ghost)
 		{
 			to_peer[partition[it]].push_back(it);
 		}
 
+		int sample_arr[G_MAX]; //This array contains packed ghost vertices to a core.
+
 		for(auto it : to_peer)
 		{
-			// cout << rank << " have ";
-			// cout << it.first << endl;
 
-			int sample_arr[it.second.size()];
+			
 
 			int send_size = it.second.size();
 			sample_arr[0] = send_size;
@@ -168,33 +177,33 @@ int main(int args, char **argv)
 			{
 				sample_arr[i++] = it1;
 			}
-			// for(int j = 0; j < it.second.size(); j++)
-			// {
-			// 	cout << " have adjacent as " << sample_arr[j] << " ";
-			// }
-			// cout << endl;
+			
 
-			MPI_Send(&sample_arr , GHOST_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD);
+			MPI_Send(&sample_arr , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD); //Sending ghost to cores.
+
+		
+
 		}
+		
+		
+		//All cores receiving the ghosts from others.
 
-		int sample_recv[GHOST_MAX];
-		MPI_Status status;
+			int sample_recv[G_MAX];
+			MPI_Status status;
 
-		if(rank >= 0)
-		{
-			int ierr = MPI_Recv(&sample_recv , GHOST_MAX , MPI_INT , MPI_ANY_SOURCE , 0 , MPI_COMM_WORLD , &status);
-
+			 
+			int ierr = MPI_Recv(&sample_recv , G_MAX , MPI_INT , MPI_ANY_SOURCE , 0 , MPI_COMM_WORLD , &status);
 
 			if(ierr == MPI_SUCCESS)
 			{
-						for(int j = 1 ; j < sample_recv[0]; j++)
+						for(int j = 1 ; j <= sample_recv[0]; j++)
 						{
-							cout << " am " << " recieved ";
-							cout << sample_recv[j] << " ";
+							cout << "I am " << rank << " recieved ";
+							cout << sample_recv[j] << " from " << status.MPI_SOURCE << " as ghost";
 						}
 						cout <<  endl;
-			}
-		}
+			}	
+			
 
 	MPI_Finalize();
 	return 0;
