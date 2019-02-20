@@ -22,6 +22,7 @@ struct vertex
 	int data;
 
 	int adj[ADJ_MAX];
+	int adj_loc[ADJ_MAX];
 	int adj_size;
 
 };
@@ -143,9 +144,76 @@ int main(int args, char **argv)
 
 
 
+
+
+
+
+
+		// Creating local indexing for the vertices.
+
+
+		map <int,int> local_Index;
+
+        		int c = 0,r = 0;
+
+                for(int i = 0; i < sub_graph.size(); i++)
+                {
+                        for(int j = 0; j < sub_graph[i].adj_size; j++,c++)
+                        {
+                                int a = sub_graph[i].adj[j];
+                                local_Index[a] = c;
+
+                        }
+                }
+
+        // cout<<"local indexing of each vertex in the sub graph is"<<endl;
+
+
+        // Filling the local indexing
+        for(int i = 0; i < sub_graph.size(); i++)
+        {
+        	for(int j = 0; j < sub_graph[i].adj_size; j++)
+        	{
+        		int d = sub_graph[i].adj[j];
+        		sub_graph[i].adj_loc[j] = local_Index.find(d)->second;
+
+        		// cout << sub_graph[i].adj[j] << ":" << sub_graph[i].adj_loc[j] << " ";
+        	}
+        	cout << endl;
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		//to_peer is a map to pack the ghost curresponding to a core together.
 
-
+        
 
 		for(auto it : ghost)
 		{
@@ -240,6 +308,7 @@ int main(int args, char **argv)
 			}
 
 			
+	
 
 	MPI_Finalize();
 	return 0;
