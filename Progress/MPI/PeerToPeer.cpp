@@ -121,12 +121,11 @@ int main(int args, char **argv)
 					sub[v_node.vertex_no].push_back(temp2);					//Storing the adjacency list.
 				}
 				sub_graph.push_back(v_node);
-
-				//Printing the subgraph peer to peer
-
 			}
 		}
 
+
+		
 
 		// Map method to find the ghost
 
@@ -139,6 +138,13 @@ int main(int args, char **argv)
 						ghost.insert(it1);
 				}
 		}
+
+
+
+
+
+
+
 
 
 
@@ -179,7 +185,7 @@ int main(int args, char **argv)
 
         		// cout << sub_graph[i].adj[j] << ":" << sub_graph[i].adj_loc[j] << " ";
         	}
-        	cout << endl;
+        	// cout << endl;
 
         }
 
@@ -218,6 +224,8 @@ int main(int args, char **argv)
 		for(auto it : ghost)
 		{
 			to_peer[partition[it]].push_back(it); //Storing the partition as key and ghost to that partiton as data.
+
+
 		}
 
 		int sample_arr[G_MAX]; //This array contains packed ghost vertices to a core.
@@ -237,7 +245,7 @@ int main(int args, char **argv)
 
 				sample_arr[i++] = it1; //Sample array filled with ghosts.
 			}
-			
+
 
 			MPI_Send(&sample_arr , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD); //Sending ghost to cores.
 
@@ -249,22 +257,20 @@ int main(int args, char **argv)
 		//All cores receiving the ghosts from others.
 
 			int sample_recv[G_MAX];
-			MPI_Status status;
-				
-	
-		//Idea is that how many ghosts belonging to a core must contain that much MPI_Recv in order to receive ghosts from other cores.	
+			MPI_Status status;	
 
+		//Packed sending and packed recieving is the idea used to implement the communication.
 
-			for(int i = 0; i < ghost.size(); i++)
+			for(auto it : to_peer)
 			{
-				int ierr = MPI_Recv(&sample_recv , G_MAX , MPI_INT , MPI_ANY_SOURCE , 0 , MPI_COMM_WORLD , &status);
+				int ierr = MPI_Recv(&sample_recv , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD , &status);
 							
 					
 								if(ierr == MPI_SUCCESS)
 								{
+											// cout << "I am " << rank << " received ";
 											for(int j = 1 ; j <= sample_recv[0]; j++)
 											{
-												// cout << "I am " << rank << " received ";
 												// cout << sample_recv[j] << " from core " << status.MPI_SOURCE << " as ghost ";
 												sample_recv[j] = data_map[sample_recv[j]];  //Filling ghost data
 											}
@@ -272,6 +278,7 @@ int main(int args, char **argv)
 											// cout <<  endl;
 
 											
+
 
 											//Sedning the ghost data to cores.
 
@@ -291,17 +298,18 @@ int main(int args, char **argv)
 			int data_recv[G_MAX];
 			MPI_Status stat;
 
-			for(int k = 0; k < ghost.size(); k++)
+			for(auto it : to_peer)
 			{	
 			
-					 	int ie = MPI_Recv(&data_recv , G_MAX , MPI_INT , MPI_ANY_SOURCE , 0 , MPI_COMM_WORLD , &stat);
+					 	int ie = MPI_Recv(&data_recv , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD , &stat);
 			
 						if(ie == MPI_SUCCESS)
 						{
+									cout << "I am " << rank << " received ";
 									for(int j = 1 ; j <= data_recv[0]; j++)
 									{
-										cout << "I am " << rank << " received ";
-										cout << data_recv[j] << " from core " << stat.MPI_SOURCE << " as data of ghost";
+										
+										cout << data_recv[j] << " from core " << stat.MPI_SOURCE << " as data of ghost ";
 									}
 									cout <<  endl;
 						}
