@@ -1,0 +1,13 @@
+1. Read Mesh file in .su2 format
+2. Check the dimension of the input
+3. Store the number of vertices
+4. For each element in the mesh file do the following
+	4.1 Check the type of element
+	4.2 Make an element to node mapping
+	4.3 Make a node to element mapping
+5. From the node to element mapping do the following.
+	5.1 For each face for an element do the following
+		5.1.1 Make an intersection among all the node to element mappings in the
+		current face.
+		5.1.2 If the cardinality of the resultant set is >= 3 then create adjacency list
+6. Write the adjacency list to a file.

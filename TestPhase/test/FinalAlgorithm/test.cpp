@@ -166,7 +166,8 @@ int main(int argv, char **args)
 	for(auto &it : edges){
 
 		// cout << k++ << " : " << it.first << " " << it.second << endl;
-		out << k++ << " : " << it.first << " " << it.second << endl; //storing elements curresponding to a face int file 'face'.
+		if(it.first != -1)
+			out << k++ << " : " << it.first << " " << it.second << endl; //storing elements curresponding to a face int file 'face'.
 
 		if(it.second == -1) //if any one of the element of a face is -1 avoid it from adjacency list.
 			continue;

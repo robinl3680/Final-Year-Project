@@ -1,0 +1,14 @@
+1. Read Mesh file in .su2 format
+2. Check the dimension of the input
+3. Store the number of vertices
+4. For each element in the mesh file do the following
+	4.1 Check the type of element
+	4.2 Make an element to node mapping
+5. From the element to node mapping do the following.
+	5.1 Find each face of an element
+	5.2 For each face for an element do the following
+		5.2.1 If this face is equal to another face of an element then make the face
+		as edge and add this pair of elements to adjacency list.
+		5.2.2 Store the face information.
+6. Write the face information to file.
+7. Write the adjacency list to a file.

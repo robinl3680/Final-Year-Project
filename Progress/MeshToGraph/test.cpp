@@ -45,7 +45,7 @@ int findType(int element_type)
 		case 9: return 4;
 		case 10:return 4;
 		case 12:return 8;
-		case 13:return 5;
+		case 13:return 6;
 		case 14:return 5;
 		default: return 0;
 	}
