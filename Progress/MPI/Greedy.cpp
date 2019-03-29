@@ -262,18 +262,52 @@ int main(int args, char **argv)
 
 		// cout << endl;
 		
-		if(rank == 2)
+		for(int i = 0 ; i < CORES; i++)
 		{
-			for(int i = 0; i < CORES; i++)
+
+			if(synch[rank][i] != 0)
 			{
-				for(int j = 0; j < CORES; j++)
+				int m = 0;
+				int sample_arr[synch[rank][i]];
+				for(auto it1 : to_peer[i])
 				{
-					cout << synch[i][j] << " ";
+					sample_arr[m++] = it1; 
 				}
-				cout << endl;
+
+				// cout << "am rank " << rank << " to core " << i << " 	";
+				// for(auto it : sample_arr)
+				// {
+				// 	cout << it << " ";
+				// }
+				// cout << endl;
+
+				MPI_Send(&sample_arr, synch[rank][i], MPI_INT, i, 0, MPI_COMM_WORLD);
+
 			}
 		}
 
+		// cout << endl;
+
+		for(int i = 0; i < CORES; i++)
+		{
+			if(synch[i][rank] != 0)
+			{
+				int data_buff[synch[i][rank]];
+				MPI_Status status;
+				int ierr = MPI_Recv(&data_buff, synch[i][rank], MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+				if(ierr == MPI_SUCCESS)
+				{
+					cout << "am rank " << rank << " from core " << i << " 	";
+					for(auto it : data_buff)
+					{
+						cout << it << " ";
+					}
+					cout << endl;
+				}
+				// cout << "done" << endl;
+
+			}
+		}
 
 
 
