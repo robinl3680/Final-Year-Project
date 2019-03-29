@@ -268,14 +268,14 @@ int main(int args, char **argv)
 					
 								if(ierr == MPI_SUCCESS)
 								{
-											cout << "I am " << rank << " received ";
+											// cout << "I am " << rank << " received ";
 											for(int j = 1 ; j <= sample_recv[0]; j++)
 											{
-												cout << sample_recv[j] << " from core " << status.MPI_SOURCE << " as ghost ";
+												// cout << sample_recv[j] << " from core " << status.MPI_SOURCE << " as ghost ";
 												sample_recv[j] = data_map[sample_recv[j]];  //Filling ghost data
 											}
 
-											cout <<  endl;
+											// cout <<  endl;
 
 											
 
@@ -305,13 +305,13 @@ int main(int args, char **argv)
 			
 						if(ie == MPI_SUCCESS)
 						{
-									// cout << "I am " << rank << " received ";
+									cout << "I am " << rank << " have ";
 									for(int j = 1 ; j <= data_recv[0]; j++)
 									{
 										
-										// cout << data_recv[j] << " from core " << stat.MPI_SOURCE << " as data of ghost ";
+										cout << data_recv[j] << " ";
 									}
-									// cout <<  endl;
+									cout <<  endl;
 						}
 			}
 

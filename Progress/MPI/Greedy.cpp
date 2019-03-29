@@ -268,6 +268,7 @@ int main(int args, char **argv)
 			if(synch[rank][i] != 0)
 			{
 				int m = 0;
+				MPI_Status status;
 				int sample_arr[synch[rank][i]];
 				for(auto it1 : to_peer[i])
 				{
@@ -282,7 +283,7 @@ int main(int args, char **argv)
 				// cout << endl;
 
 				MPI_Send(&sample_arr, synch[rank][i], MPI_INT, i, 0, MPI_COMM_WORLD);
-
+			
 			}
 		}
 
@@ -297,15 +298,32 @@ int main(int args, char **argv)
 				int ierr = MPI_Recv(&data_buff, synch[i][rank], MPI_INT, i, 0, MPI_COMM_WORLD, &status);
 				if(ierr == MPI_SUCCESS)
 				{
-					cout << "am rank " << rank << " from core " << i << " 	";
-					for(auto it : data_buff)
+					for(int j = 0; j < synch[i][rank]; j++)
+					{
+						data_buff[j] = data_map[data_buff[j]];
+					}
+					MPI_Send(&data_buff, synch[i][rank], MPI_INT, i, 0, MPI_COMM_WORLD);
+				}
+
+			}
+		}
+
+		for(int i = 0; i < CORES ; i++)
+		{
+			if(synch[i][rank] != 0)
+			{
+				int sample_recv[synch[i][rank]];
+				MPI_Status status;
+				int ierr = MPI_Recv(&sample_recv, synch[rank][i], MPI_INT, i, 0, MPI_COMM_WORLD, &status);
+				if(ierr == MPI_SUCCESS)
+				{
+					cout << "am rank " << rank << " have ";
+					for(auto it : sample_recv)
 					{
 						cout << it << " ";
 					}
 					cout << endl;
 				}
-				// cout << "done" << endl;
-
 			}
 		}
 
