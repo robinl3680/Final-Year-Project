@@ -28,14 +28,6 @@ struct vertex
 
 //function used for storing the vertex value.
 
-int dummy(){
-
-	int data;
-	cout << "Enter vertex data " << endl;
-	cin >> data;
-	return data;
-}
-
 
 
 int main(int args, char **argv)
@@ -99,7 +91,7 @@ int main(int args, char **argv)
 
 
 			v_node.vertex_no = i;
-			v_node.data = dummy(); //Getting vertex data.
+			v_node.data = i + 5; //Getting vertex data.
 			v_node.adj_size = 0;
 
 			vertex_data[i] = v_node.data; // Copy data to vertex_data.
@@ -218,12 +210,13 @@ int main(int args, char **argv)
 
 		//Printing the ghosts and their data associated with each core.
 
-		cout << "ghosts in processor " << rank << " : \n";
+		cout << "I am " << rank << " have ";
 
 		for(auto it : ghosts){
 
-			cout << it << " : data : " << data_map[it] << endl;
+			cout << data_map[it] << " ";
 		}
+		cout << endl;
 
 	}
 	
