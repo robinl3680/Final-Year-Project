@@ -17,7 +17,7 @@ using namespace std;
 
 
 
-
+//Search function to check whether the synchornization matrix have all 0 entries.
 
 int sear(int synch[CORES][CORES])
 {
@@ -311,15 +311,19 @@ int main(int args, char **argv)
 
 
 
+	// This section used for finding the largest size in the matrix using a greedy technique.
+	// After one complete iteration i,j entries are pushed into vector of pairs 'v'.
+	// Then the complete vector is stored in vector 'session'. It contain complete sessions.
 
+	// This is a one time computation so does not need much optimization.
 
-	vector<vector<pair<int,int>>> v2;
+	vector<vector<pair<int,int>>> session;
 	int pos_i,pos_j;
 
 	while(sear(synch))
 	{
-		unordered_set<int> j_set;
-		unordered_set<int> i_set;
+		unordered_set<int> j_set; // Map used to store current largest element's i value.
+		unordered_set<int> i_set; // Map used to store current largest element's j value.
 		vector<pair<int,int>> v;
 		for(int m = 0; m < CORES; m++)
 		{
@@ -340,7 +344,6 @@ int main(int args, char **argv)
 			}
 			if(synch[pos_i][pos_j] != 0)
 				{
-					// cout << "now " << synch[pos_i][pos_j] << endl;
 					synch[pos_i][pos_j] = 0;
 					i_set.insert(pos_i);
 					j_set.insert(pos_j);
@@ -348,12 +351,12 @@ int main(int args, char **argv)
 				}
 		}
 
-		v2.push_back(v);
+		session.push_back(v);
 	}
 
 	if(rank == 1)
 	{
-		for(auto it : v2)
+		for(auto it : session)
 		{
 			for(auto it1 : it)
 			{
@@ -362,6 +365,8 @@ int main(int args, char **argv)
 			cout << endl;
 		}
 	}
+
+
 
 
 
