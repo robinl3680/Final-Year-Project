@@ -60,6 +60,11 @@ int main(int args, char **argv)
     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_vertex_type);
     MPI_Type_commit(&mpi_vertex_type);
 
+
+
+    int count_all = 0;
+	int total_count[CORES*CORES];
+
     // Core zero doing the task of reading the partition and adjacency.
 	if(rank == 0)
 	{
@@ -80,6 +85,14 @@ int main(int args, char **argv)
 		{
 			int temp1;
 			int temp2;
+
+
+
+
+
+
+			
+
 			
 			getline(graph_file,gph); //Line by line reading graph.
 			getline(partition_file,part); //Line by line reading partition.
@@ -103,7 +116,9 @@ int main(int args, char **argv)
 				v_node.adj_size++;						//Storing the adjacency list.
 			}
 
-			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD); //Send each vertex of partition to curresponding core.
+			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD);
+
+			count_all++; //Send each vertex of partition to curresponding core.
 
 		}
 
@@ -113,6 +128,7 @@ int main(int args, char **argv)
 		for(int i = 0; i < 3; i++)
 		{
 			MPI_Send(&v_node,1,mpi_vertex_type,i+1,0,MPI_COMM_WORLD);
+			count_all++;
 		}
 
 		//To send data of ghost vertices.
@@ -127,12 +143,13 @@ int main(int args, char **argv)
 
 			if(ierr == MPI_SUCCESS)
 			{
-
+				count_all++;
 
 				for(int j = 1 ; j <= R[0] ; j++)
 					R[j] = vertex_data[R[j]];	//Storing the vertex data of ghost.
 
 				MPI_Send(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD);	//Send back the response.
+				count_all++;
 			}
 
 		}
@@ -159,7 +176,7 @@ int main(int args, char **argv)
 
 			if(ierr == MPI_SUCCESS)
 			{
-
+				count_all++;
 				if(v_node.data == -1)
 					break;
 
@@ -197,9 +214,14 @@ int main(int args, char **argv)
 
 		MPI_Send(&R , GHOST_MAX+1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD);	//Sending request for getting ghost vertex data.
 
+		count_all++;
+
 		int ierr = MPI_Recv(&R , GHOST_MAX+1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD , &status); //Receiving ghost data.
 
 		if(ierr == MPI_SUCCESS){
+
+			count_all++;
+
 			int i = 1;
 
 			for(auto it : ghosts)
@@ -219,6 +241,24 @@ int main(int args, char **argv)
 		cout << endl;
 
 	}
+
+
+
+
+
+
+	MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
+
+
+			if(rank == 1)
+			{
+				cout << " Finally i received ";
+				for(auto it : total_count)
+				{
+					cout << it << " ";
+				}
+				cout << endl;
+			}
 	
 
 	MPI_Finalize();

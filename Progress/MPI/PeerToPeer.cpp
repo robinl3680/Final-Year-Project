@@ -8,7 +8,7 @@
 
 
 #define MAX 	  100000
-#define CORES 	  4
+#define CORES 	  3
 #define ADJ_MAX   10
 #define GHOST_MAX 100000
 #define G_MAX 100
@@ -40,6 +40,13 @@ int main(int args, char **argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 	int partition[MAX+1];
+
+
+
+	int count_all = 0;
+	int total_count[CORES*CORES];
+
+
 
 	ifstream partition_file(argv[1]); //Accessing partitioned graph.
 	ifstream graph_file(argv[2]);	//Accessing graph file.
@@ -248,6 +255,7 @@ int main(int args, char **argv)
 
 
 			MPI_Send(&sample_arr , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD); //Sending ghost to cores.
+			count_all++;
 
 		
 
@@ -264,10 +272,13 @@ int main(int args, char **argv)
 			for(auto it : to_peer)
 			{
 				int ierr = MPI_Recv(&sample_recv , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD , &status);
+				
 							
 					
 								if(ierr == MPI_SUCCESS)
 								{
+									count_all++;
+
 											// cout << "I am " << rank << " received ";
 											for(int j = 1 ; j <= sample_recv[0]; j++)
 											{
@@ -284,6 +295,7 @@ int main(int args, char **argv)
 
 
 											MPI_Send(&sample_recv , G_MAX , MPI_INT , status.MPI_SOURCE , 0 , MPI_COMM_WORLD);
+											count_all++;
 								}
 			}
 
@@ -302,9 +314,12 @@ int main(int args, char **argv)
 			{	
 			
 					 	int ie = MPI_Recv(&data_recv , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD , &stat);
-			
+						
+					 	
+
 						if(ie == MPI_SUCCESS)
 						{
+							count_all++;
 									cout << "I am " << rank << " have ";
 									for(int j = 1 ; j <= data_recv[0]; j++)
 									{
@@ -315,7 +330,19 @@ int main(int args, char **argv)
 						}
 			}
 
-			
+			MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
+
+
+			if(rank == 1)
+			{
+				cout << " Finally i received ";
+				for(auto it : total_count)
+				{
+					cout << it << " ";
+				}
+				cout << endl;
+			}
+
 	
 
 	MPI_Finalize();

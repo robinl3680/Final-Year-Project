@@ -15,6 +15,28 @@
 
 using namespace std;
 
+
+
+
+
+int sear(int synch[CORES][CORES])
+{
+	for(int i = 0; i < CORES; i++)
+	{
+		for(int j = 0; j < CORES; j++)
+		{
+			if(synch[i][j] != 0)
+				return 1;
+		}
+	}
+	return 0;
+}
+
+
+
+
+
+
 //Structure used for storing vertex.
 struct vertex
 {
@@ -38,6 +60,17 @@ int main(int args, char **argv)
 	MPI_Init(&args,&argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+
+
+
+
+
+	int count_all = 0;
+	int total_count[CORES*CORES];
+
+	for(int i = 0; i < CORES * CORES ; i++)
+		total_count[i] = 0;
 	
 
 	int send_buffer[CORES];
@@ -262,70 +295,80 @@ int main(int args, char **argv)
 
 		// cout << endl;
 		
-		for(int i = 0 ; i < CORES; i++)
+
+		if(rank == 0)
 		{
-
-			if(synch[rank][i] != 0)
+			for(int i = 0 ; i < CORES; i++)
 			{
-				int m = 0;
-				MPI_Status status;
-				int sample_arr[synch[rank][i]];
-				for(auto it1 : to_peer[i])
+				for(int j = 0; j < CORES; j++)
 				{
-					sample_arr[m++] = it1; 
+					cout << synch[i][j] << " ";
 				}
+				cout << endl;
+			}
+		}
 
-				// cout << "am rank " << rank << " to core " << i << " 	";
-				// for(auto it : sample_arr)
-				// {
-				// 	cout << it << " ";
-				// }
-				// cout << endl;
 
-				MPI_Send(&sample_arr, synch[rank][i], MPI_INT, i, 0, MPI_COMM_WORLD);
+
+
+
+
+	vector<vector<pair<int,int>>> v2;
+	int pos_i,pos_j;
+
+	while(sear(synch))
+	{
+		unordered_set<int> j_set;
+		unordered_set<int> i_set;
+		vector<pair<int,int>> v;
+		for(int m = 0; m < CORES; m++)
+		{
+			int curr = 0;
 			
-			}
-		}
-
-		// cout << endl;
-
-		for(int i = 0; i < CORES; i++)
-		{
-			if(synch[i][rank] != 0)
+			for(int i = 0; i < CORES; i++)
 			{
-				int data_buff[synch[i][rank]];
-				MPI_Status status;
-				int ierr = MPI_Recv(&data_buff, synch[i][rank], MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-				if(ierr == MPI_SUCCESS)
+				for(int j = 0; j < CORES; j++)
 				{
-					for(int j = 0; j < synch[i][rank]; j++)
+					if(synch[i][j] > curr && i_set.find(i) == i_set.end() && j_set.find(j) == j_set.end() )
 					{
-						data_buff[j] = data_map[data_buff[j]];
-					}
-					MPI_Send(&data_buff, synch[i][rank], MPI_INT, i, 0, MPI_COMM_WORLD);
-				}
+						curr = synch[i][j];
+						pos_i = i;
+						pos_j = j;
 
-			}
-		}
-
-		for(int i = 0; i < CORES ; i++)
-		{
-			if(synch[i][rank] != 0)
-			{
-				int sample_recv[synch[i][rank]];
-				MPI_Status status;
-				int ierr = MPI_Recv(&sample_recv, synch[rank][i], MPI_INT, i, 0, MPI_COMM_WORLD, &status);
-				if(ierr == MPI_SUCCESS)
-				{
-					cout << "am rank " << rank << " have ";
-					for(auto it : sample_recv)
-					{
-						cout << it << " ";
 					}
-					cout << endl;
 				}
 			}
+			if(synch[pos_i][pos_j] != 0)
+				{
+					// cout << "now " << synch[pos_i][pos_j] << endl;
+					synch[pos_i][pos_j] = 0;
+					i_set.insert(pos_i);
+					j_set.insert(pos_j);
+					v.push_back({pos_i,pos_j});
+				}
 		}
+
+		v2.push_back(v);
+	}
+
+	if(rank == 1)
+	{
+		for(auto it : v2)
+		{
+			for(auto it1 : it)
+			{
+				cout<< "i = " << it1.first << " j = " << it1.second << " ";
+			}
+			cout << endl;
+		}
+	}
+
+
+
+
+
+
+
 
 
 
