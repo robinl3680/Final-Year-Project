@@ -10,8 +10,6 @@
 #define MAX 	  100000
 #define CORES 	  3
 #define ADJ_MAX   10
-#define GHOST_MAX 100000
-#define G_MAX 100
 
 using namespace std;
 
@@ -67,13 +65,14 @@ int main(int args, char **argv)
 
 
 	int count_all = 0;
-	int total_count[CORES*CORES];
+	int total_count[CORES*CORES]; // It is used for taking count of communication from all cores.
 
 	for(int i = 0; i < CORES * CORES ; i++)
 		total_count[i] = 0;
 	
 
-	int send_buffer[CORES];
+	int send_buffer[CORES]; 	// This buffer used to send the row which contain information about amount of ghost it has to received from other cores.
+
 
 
 	for(int i = 0; i < CORES; i++)
@@ -83,7 +82,7 @@ int main(int args, char **argv)
 
 
 
-	int recv_buffer[CORES * CORES];
+	int recv_buffer[CORES * CORES]; //This buffer is used to collect send_buffer information from all cores.
 
 	for(int i = 0; i < CORES*CORES; i++)
 	{
@@ -114,28 +113,26 @@ int main(int args, char **argv)
     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_vertex_type);
     MPI_Type_commit(&mpi_vertex_type);
 
-    // Core zero doing the task of reading the partition and adjacency.
 	
 		int v,e;
 		string gph,part;
 
 		getline(graph_file,gph); //Line by line reading graph.
 		
-		sscanf(&gph[0],"%d%d",&v,&e);
-		// cout << v << " " << e << endl; //Vertices and edges.
+		sscanf(&gph[0],"%d%d",&v,&e); //Number of vertices and number of edges.
 
 		vector<int> vertex_data(v+1); //To store data in each vertex.
 
 
-		vector<vertex> sub_graph;
+		vector<vertex> sub_graph; //Used to store the subgraph.
 
-		map<int,vector<int>> sub;
+		map<int,vector<int>> sub; //Map used for the subgraph.
 
-		map<int,vector<int>> to_peer;
+		map<int,vector<int>> to_peer; //Contains ghost that has to send to other cores key as core number and a list containing the ghosts.
 
-		set<int> ghost;
+		set<int> ghost; //Used to find the ghost.
 
-		map<int,int> data_map;
+		map<int,int> data_map; //Used to store the data of each vertex.
 
 
 		for(int i = 1 ; i <= v ; i++)
@@ -164,7 +161,8 @@ int main(int args, char **argv)
 				vertex v_node;
 				v_node.vertex_no = i;
 				v_node.adj_size = 0;
-				v_node.data = i + 5;
+				v_node.data = i + 5; //Vertex data is a constant
+
 				data_map[i] = v_node.data;
 				
 				while(ss >> temp2) //String stream for accessing each vertex in that line.
@@ -187,7 +185,7 @@ int main(int args, char **argv)
 		{
 			for(auto it1 : it.second)
 				{
-					if(sub.find(it1) == sub.end())
+					if(sub.find(it1) == sub.end()) //If an element in the adjacency list does not contained in the list of vetices for that core add to ghost
 						ghost.insert(it1);
 				}
 		}
@@ -201,11 +199,7 @@ int main(int args, char **argv)
 
 
 
-
-
-
-
-		// Creating local indexing for the vertices.
+		// Creating local indexing for the vertices which make easy to access the adjacent vertex in constant time.
 
 
 		map <int,int> local_Index;
@@ -222,8 +216,6 @@ int main(int args, char **argv)
                         }
                 }
 
-        // cout<<"local indexing of each vertex in the sub graph is"<<endl;
-
 
         // Filling the local indexing
         for(int i = 0; i < sub_graph.size(); i++)
@@ -232,22 +224,9 @@ int main(int args, char **argv)
         	{
         		int d = sub_graph[i].adj[j];
         		sub_graph[i].adj_loc[j] = local_Index.find(d)->second;
-
-        		// cout << sub_graph[i].adj[j] << ":" << sub_graph[i].adj_loc[j] << " ";
         	}
-        	// cout << endl;
 
         }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -264,50 +243,30 @@ int main(int args, char **argv)
 		}
 		for(auto it : to_peer)
 		{
-			send_buffer[it.first] = it.second.size();
+			send_buffer[it.first] = it.second.size(); //Filling the send_buffer.
 		}
 		
 
 
 		//Creating synchornization message to pass to all cores about size of ghost.
 
-		int synch[CORES][CORES];
+		int synch[CORES][CORES];	//Matrix used to store the received synchornization information from all cores.
+		int synch_dup[CORES][CORES];	//Duplicating the synch matrix.
 		int tmp = 0 , k = 0;
 		MPI_Allgather(&send_buffer,CORES,MPI_INT,&recv_buffer,CORES,MPI_INT,MPI_COMM_WORLD);
-
-		// cout << " Am rank " << rank << "	 ";
 
 		for(int i = 0 ; i < CORES * CORES; i++)
 		{
 			if(i % CORES == 0 && i != 0)
 			{
-					// cout << endl;
-
 					tmp++;
 					k = 0;
 			}
-			synch[tmp][k] = recv_buffer[i];
+			synch[tmp][k] = recv_buffer[i];	//Filling out the synch matrix.
+			synch_dup[tmp][k] = recv_buffer[i];
 			k++;
-
-			// cout << recv_buffer[i] << " ";
 		
 		}
-
-		// cout << endl;
-		
-
-		if(rank == 0)
-		{
-			for(int i = 0 ; i < CORES; i++)
-			{
-				for(int j = 0; j < CORES; j++)
-				{
-					cout << synch[i][j] << " ";
-				}
-				cout << endl;
-			}
-		}
-
 
 
 
@@ -354,24 +313,61 @@ int main(int args, char **argv)
 		session.push_back(v);
 	}
 
-	if(rank == 1)
+
+	//Communication section. This is a greedy approach which utilizes the session information stored in 'session' vector
+	//Inner for loop iterates for each 'i'  'j' in session and outer for loop iterates on sessions.
+
+	for(auto it : session)
 	{
-		for(auto it : session)
+		for(auto it1 : it)
 		{
-			for(auto it1 : it)
+			if(rank == it1.first)
 			{
-				cout<< "i = " << it1.first << " j = " << it1.second << " ";
+				auto it3 = to_peer[it1.second];
+				int sz = it3.size();
+				int send_arr[sz];
+				int k = 0;
+				for(auto it2 : it3)
+				{
+					send_arr[k++] = it2;
+				}
+				
+				MPI_Send(&send_arr,sz,MPI_INT,it1.second,0,MPI_COMM_WORLD);
 			}
-			cout << endl;
+			if(rank == it1.second)
+			{
+				int recv_arr[synch_dup[it1.first][it1.second]];
+				MPI_Status status;
+				int ierr = MPI_Recv(&recv_arr,synch_dup[it1.first][it1.second],MPI_INT,it1.first,0,MPI_COMM_WORLD,&status);
+				if(ierr == MPI_SUCCESS)
+				{
+					
+					for(int i = 0; i < synch_dup[it1.first][it1.second]; i++)
+						{
+							recv_arr[i] = data_map[recv_arr[i]];
+						}
+					MPI_Send(&recv_arr,synch_dup[it1.first][it1.second],MPI_INT,it1.first,0,MPI_COMM_WORLD);
+					
+				}		
+			}
+			if(rank == it1.first)
+			{
+				int recv_data[synch_dup[it1.first][it1.second]];
+				MPI_Status status;
+				int ierr = MPI_Recv(&recv_data,synch_dup[it1.first][it1.second],MPI_INT,it1.second,0,MPI_COMM_WORLD,&status);
+				if(ierr == MPI_SUCCESS)
+				{
+					cout << "I am " << rank << " have ";
+									for(auto it : recv_data)
+									{
+										cout << it << " ";
+									}
+									cout <<  endl;	
+				}	
+
+			}
 		}
 	}
-
-
-
-
-
-
-
 
 
 
