@@ -333,12 +333,14 @@ int main(int args, char **argv)
 				}
 				
 				MPI_Send(&send_arr,sz,MPI_INT,it1.second,0,MPI_COMM_WORLD);
+				count_all++;
 			}
 			if(rank == it1.second)
 			{
 				int recv_arr[synch_dup[it1.first][it1.second]];
 				MPI_Status status;
 				int ierr = MPI_Recv(&recv_arr,synch_dup[it1.first][it1.second],MPI_INT,it1.first,0,MPI_COMM_WORLD,&status);
+				count_all++;
 				if(ierr == MPI_SUCCESS)
 				{
 					
@@ -347,6 +349,7 @@ int main(int args, char **argv)
 							recv_arr[i] = data_map[recv_arr[i]];
 						}
 					MPI_Send(&recv_arr,synch_dup[it1.first][it1.second],MPI_INT,it1.first,0,MPI_COMM_WORLD);
+					count_all++;
 					
 				}		
 			}
@@ -355,6 +358,7 @@ int main(int args, char **argv)
 				int recv_data[synch_dup[it1.first][it1.second]];
 				MPI_Status status;
 				int ierr = MPI_Recv(&recv_data,synch_dup[it1.first][it1.second],MPI_INT,it1.second,0,MPI_COMM_WORLD,&status);
+				count_all++;
 				if(ierr == MPI_SUCCESS)
 				{
 					cout << "I am " << rank << " have ";
@@ -371,6 +375,19 @@ int main(int args, char **argv)
 
 
 
+
+	MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
+
+
+			if(rank == 2)
+			{
+				cout << " Finally i received ";
+				for(auto it : total_count)
+				{
+					cout << it << " ";
+				}
+				cout << endl;
+			}
 
 
 

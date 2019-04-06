@@ -67,8 +67,6 @@ int main(int args, char **argv)
 
     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_vertex_type);
     MPI_Type_commit(&mpi_vertex_type);
-
-    // Core zero doing the task of reading the partition and adjacency.
 	
 		int v,e;
 		string gph,part;
@@ -76,7 +74,6 @@ int main(int args, char **argv)
 		getline(graph_file,gph); //Line by line reading graph.
 		
 		sscanf(&gph[0],"%d%d",&v,&e);
-		// cout << v << " " << e << endl; //Vertices and edges.
 
 		vector<int> vertex_data(v+1); //To store data in each vertex.
 
@@ -155,13 +152,6 @@ int main(int args, char **argv)
 
 
 
-
-
-
-
-
-
-
 		// Creating local indexing for the vertices.
 
 
@@ -179,8 +169,6 @@ int main(int args, char **argv)
                         }
                 }
 
-        // cout<<"local indexing of each vertex in the sub graph is"<<endl;
-
 
         // Filling the local indexing
         for(int i = 0; i < sub_graph.size(); i++)
@@ -195,27 +183,6 @@ int main(int args, char **argv)
         	// cout << endl;
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -314,8 +281,6 @@ int main(int args, char **argv)
 			{	
 			
 					 	int ie = MPI_Recv(&data_recv , G_MAX , MPI_INT , it.first , 0 , MPI_COMM_WORLD , &stat);
-						
-					 	
 
 						if(ie == MPI_SUCCESS)
 						{
@@ -330,6 +295,9 @@ int main(int args, char **argv)
 						}
 			}
 
+
+			// This is used for taking the count for number of commincation between cores.
+			
 			MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
 
