@@ -8,7 +8,7 @@
 
 
 #define MAX 	  100000
-#define CORES 	  3
+#define CORES 	  100
 #define ADJ_MAX   10
 #define GHOST_MAX 100000
 #define G_MAX 100
@@ -297,19 +297,19 @@ int main(int args, char **argv)
 
 
 			// This is used for taking the count for number of commincation between cores.
-			
+
 			MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
 
-			if(rank == 1)
-			{
-				cout << " Finally i received ";
-				for(auto it : total_count)
-				{
-					cout << it << " ";
-				}
-				cout << endl;
-			}
+			// if(rank == 1)
+			// {
+			// 	cout << " Finally i received ";
+			// 	for(auto it : total_count)
+			// 	{
+			// 		cout << it << " ";
+			// 	}
+			// 	cout << endl;
+			// }
 
 	
 

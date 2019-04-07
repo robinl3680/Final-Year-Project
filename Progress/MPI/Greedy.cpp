@@ -8,8 +8,8 @@
 
 
 #define MAX 	  100000
-#define CORES 	  3
-#define ADJ_MAX   10
+#define CORES 	  100
+#define ADJ_MAX   1000
 
 using namespace std;
 
@@ -379,15 +379,15 @@ int main(int args, char **argv)
 	MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
 
-			if(rank == 2)
-			{
-				cout << " Finally i received ";
-				for(auto it : total_count)
-				{
-					cout << it << " ";
-				}
-				cout << endl;
-			}
+			// if(rank == 2)
+			// {
+			// 	cout << " Finally i received ";
+			// 	for(auto it : total_count)
+			// 	{
+			// 		cout << it << " ";
+			// 	}
+			// 	cout << endl;
+			// }
 
 
 

@@ -8,7 +8,7 @@
 
 
 #define MAX 	  100000
-#define CORES 	  4
+#define CORES 	  101
 #define ADJ_MAX   10
 #define GHOST_MAX 100000
 
@@ -125,7 +125,7 @@ int main(int args, char **argv)
 		//To notify end of input.
 
 		v_node.data = -1;
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < CORES-1; i++)
 		{
 			MPI_Send(&v_node,1,mpi_vertex_type,i+1,0,MPI_COMM_WORLD);
 			count_all++;
@@ -250,15 +250,15 @@ int main(int args, char **argv)
 	MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
 
-			if(rank == 1)
-			{
-				cout << " Finally i received ";
-				for(auto it : total_count)
-				{
-					cout << it << " ";
-				}
-				cout << endl;
-			}
+			// if(rank == 1)
+			// {
+			// 	cout << " Finally i received ";
+			// 	for(auto it : total_count)
+			// 	{
+			// 		cout << it << " ";
+			// 	}
+			// 	cout << endl;
+			// }
 	
 
 	MPI_Finalize();
