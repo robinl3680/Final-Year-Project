@@ -40,6 +40,11 @@ int main(int args, char **argv)
 
 	int partition[MAX+1];
 
+
+	double t1,t2;
+
+
+
 	ifstream partition_file(argv[1]); //Accessing partitioned graph.
 	ifstream graph_file(argv[2]);	//Accessing graph file.
 
@@ -62,10 +67,17 @@ int main(int args, char **argv)
 
 
 
-    int count_all = 0;
+    int count_all = 1;
 	int total_count[CORES*CORES];
+	for(int i = 0; i < CORES * CORES; i++)
+	{
+		total_count[i] = 0;
+	}
 
     // Core zero doing the task of reading the partition and adjacency.
+    
+
+
 	if(rank == 0)
 	{
 		int v,e;
@@ -117,18 +129,18 @@ int main(int args, char **argv)
 			}
 
 			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD);
-
-			count_all++; //Send each vertex of partition to curresponding core.
+			
+			count_all+=8; //Send each vertex of partition to curresponding core.
 
 		}
 
 		//To notify end of input.
-
+		
 		v_node.data = -1;
 		for(int i = 0; i < CORES-1; i++)
 		{
 			MPI_Send(&v_node,1,mpi_vertex_type,i+1,0,MPI_COMM_WORLD);
-			count_all++;
+			count_all+=8;
 		}
 
 		//To send data of ghost vertices.
@@ -149,7 +161,7 @@ int main(int args, char **argv)
 					R[j] = vertex_data[R[j]];	//Storing the vertex data of ghost.
 
 				MPI_Send(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD);	//Send back the response.
-				count_all++;
+				count_all+=8;
 			}
 
 		}
@@ -160,7 +172,7 @@ int main(int args, char **argv)
 
 
 
-
+	t1 = MPI_Wtime();
 	if(rank != 0)
 	{
 		vertex v_node;
@@ -176,7 +188,7 @@ int main(int args, char **argv)
 
 			if(ierr == MPI_SUCCESS)
 			{
-				count_all++;
+				count_all+=8;
 				if(v_node.data == -1)
 					break;
 
@@ -220,7 +232,7 @@ int main(int args, char **argv)
 
 		if(ierr == MPI_SUCCESS){
 
-			count_all++;
+			count_all+=8;
 
 			int i = 1;
 
@@ -229,6 +241,8 @@ int main(int args, char **argv)
 		}
 
 
+
+		
 
 		//Printing the ghosts and their data associated with each core.
 
@@ -242,7 +256,7 @@ int main(int args, char **argv)
 
 	}
 
-
+	t2 = MPI_Wtime();
 
 
 
@@ -250,15 +264,18 @@ int main(int args, char **argv)
 	MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
 
-			// if(rank == 1)
-			// {
-			// 	cout << " Finally i received ";
-			// 	for(auto it : total_count)
-			// 	{
-			// 		cout << it << " ";
-			// 	}
-			// 	cout << endl;
-			// }
+			int sum = 0;
+
+			if(rank == 1)
+			{
+				// cout << " Finally i received ";
+				for(auto it : total_count)
+				{
+					sum += it;
+				}
+				cout << "total count = " << sum << endl;
+				cout << "time difference = " << t2-t1 << endl;
+			}
 	
 
 	MPI_Finalize();
