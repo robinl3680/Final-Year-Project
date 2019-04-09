@@ -8,7 +8,6 @@
 
 
 #define MAX 	  100000
-#define CORES 	  100
 #define ADJ_MAX   10
 #define GHOST_MAX 100000
 #define G_MAX 100
@@ -39,10 +38,15 @@ int main(int args, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+	int CORES = size;
+
 	int partition[MAX+1];
 
 
+	double t1,t2;
 
+
+	t1 = MPI_Wtime();
 	int count_all = 0;
 	int total_count[CORES*CORES];
 
@@ -88,6 +92,7 @@ int main(int args, char **argv)
 
 		map<int,int> data_map;
 
+		
 
 		for(int i = 1 ; i <= v ; i++)
 		{
@@ -204,6 +209,8 @@ int main(int args, char **argv)
 
 		int sample_arr[G_MAX]; //This array contains packed ghost vertices to a core.
 
+		
+
 		for(auto it : to_peer)
 		{
 
@@ -296,20 +303,25 @@ int main(int args, char **argv)
 			}
 
 
+
+			
+
 			// This is used for taking the count for number of commincation between cores.
 
 			MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
+			t2 = MPI_Wtime();
 
-			// if(rank == 1)
-			// {
+			if(rank == 1)
+			{
 			// 	cout << " Finally i received ";
 			// 	for(auto it : total_count)
 			// 	{
 			// 		cout << it << " ";
 			// 	}
 			// 	cout << endl;
-			// }
+				cout << "time difference is = " << t2-t1 << endl;
+			}
 
 	
 

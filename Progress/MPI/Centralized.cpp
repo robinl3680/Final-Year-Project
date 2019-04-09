@@ -8,7 +8,6 @@
 
 
 #define MAX 	  100000
-#define CORES 	  101
 #define ADJ_MAX   10
 #define GHOST_MAX 100000
 
@@ -37,6 +36,7 @@ int main(int args, char **argv)
 	MPI_Init(&args,&argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	int CORES = size;
 
 	int partition[MAX+1];
 

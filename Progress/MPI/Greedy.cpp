@@ -8,22 +8,19 @@
 
 
 #define MAX 	  100000
-#define CORES 	  100
 #define ADJ_MAX   1000
 
 using namespace std;
 
-
-
 //Search function to check whether the synchornization matrix have all 0 entries.
 
-int sear(int synch[CORES][CORES])
+int sear(int CORES,int *synch)
 {
 	for(int i = 0; i < CORES; i++)
 	{
 		for(int j = 0; j < CORES; j++)
 		{
-			if(synch[i][j] != 0)
+			if(*((synch+i*CORES) + j) != 0)
 				return 1;
 		}
 	}
@@ -59,6 +56,7 @@ int main(int args, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+	int CORES = size;
 
 
 
@@ -279,7 +277,7 @@ int main(int args, char **argv)
 	vector<vector<pair<int,int>>> session;
 	int pos_i,pos_j;
 
-	while(sear(synch))
+	while(sear(CORES,(int *)synch))
 	{
 		unordered_set<int> j_set; // Map used to store current largest element's i value.
 		unordered_set<int> i_set; // Map used to store current largest element's j value.
@@ -317,8 +315,12 @@ int main(int args, char **argv)
 	//Communication section. This is a greedy approach which utilizes the session information stored in 'session' vector
 	//Inner for loop iterates for each 'i'  'j' in session and outer for loop iterates on sessions.
 
+	double t1,t2;
+	
+	t1 = MPI_Wtime();
 	for(auto it : session)
 	{
+
 		for(auto it1 : it)
 		{
 			if(rank == it1.first)
@@ -333,6 +335,7 @@ int main(int args, char **argv)
 				}
 				
 				MPI_Send(&send_arr,sz,MPI_INT,it1.second,0,MPI_COMM_WORLD);
+
 				count_all++;
 			}
 			if(rank == it1.second)
@@ -374,20 +377,22 @@ int main(int args, char **argv)
 	}
 
 
-
+	t2 = MPI_Wtime();
 
 	MPI_Allgather(&count_all,1,MPI_INT,&total_count,CORES,MPI_INT,MPI_COMM_WORLD);
 
 
-			// if(rank == 2)
-			// {
+			if(rank == 1)
+			{
 			// 	cout << " Finally i received ";
 			// 	for(auto it : total_count)
 			// 	{
 			// 		cout << it << " ";
 			// 	}
 			// 	cout << endl;
-			// }
+
+				cout << "time difference is = " << t2-t1 << endl;
+			}
 
 
 
