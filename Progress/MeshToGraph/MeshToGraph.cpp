@@ -12,7 +12,7 @@ struct elements	//Structure for the elements
 
 void makeFace( vector< set<long long int> > &f , elements &e){ 
 //Function that make faces for each element
-
+	// cout << "hai" << endl;
 	switch( e.type ){
 
 
@@ -43,6 +43,20 @@ void makeFace( vector< set<long long int> > &f , elements &e){
 
 					 }
 					 break;
+		case 13:	{
+						set<long long int> s1 = {e.node[0],e.node[1],e.node[4],e.node[3]};
+						set<long long int> s2 = {e.node[1],e.node[2],e.node[0]};
+						set<long long int> s3 = {e.node[1],e.node[4],e.node[5],e.node[2]};
+						set<long long int> s4 = {e.node[0],e.node[3],e.node[5],e.node[2]};
+						set<long long int> s5 = {e.node[3],e.node[4],e.node[5]};
+						f.push_back(s1);
+						f.push_back(s2);
+						f.push_back(s3);
+						f.push_back(s4);
+						f.push_back(s5);
+
+					}
+					break;
 
 		case 14 : {
 						set<long long int> s1 = {e.node[0],e.node[1],e.node[2],e.node[3]};
@@ -83,14 +97,23 @@ int findType(int element_type)
 vector<elements> v;
 int main(int argv, char **args)
 {
+	if(argv != 4)
+	{
+		cout << " Enter input file as first argument, graph file as second argument and face file as third argument" << endl;
+		cout << "Argument missing" << endl;
+		exit(0);
+	}
 	ifstream input(args[1]);
-	ofstream output("result.txt");
-	ofstream out("faces.txt");
+	ofstream output(args[2]);
+	ofstream out(args[3]);
 	long long int num_elements,elem_type,diamension;
 	string temp1,temp2;
 	input >> temp1 >> diamension;
 	input >> temp2 >> num_elements;
 	cout << diamension << " " << num_elements << endl;
+
+	// cout << "hai dear" << endl;
+
 	for(long long int i=0; i < num_elements; i++)
 	{
 	// For storing nodes of each element
@@ -102,7 +125,7 @@ int main(int argv, char **args)
 		while(num_nodes--)
 		{
 			input >> nodes;
-			nodes += 1;
+			// nodes += 1;
 			store.node.push_back(nodes);
 		}
 		v.push_back(store);
@@ -126,6 +149,14 @@ int main(int argv, char **args)
 		makeFace(f , e); //returns faces that makes the current element.
 
 		for(auto &it : f){
+
+
+			// set<long long int> temp = it;
+			// for(auto it1 : temp)
+			// 	cout << it1 << " ";
+			// cout << endl;
+
+
 
 			if(faceID[it] == 0){ //Check for the first occurence of a face.
 
