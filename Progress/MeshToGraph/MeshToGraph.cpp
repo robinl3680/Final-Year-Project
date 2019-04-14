@@ -43,18 +43,18 @@ void makeFace( vector< set<long long int> > &f , elements &e){
 
 					 }
 
-		// case 14 : {
-		// 				set<int> s1 = {e.node[0],e.node[1],e.node[2],e.node[3]};
-		// 				set<int> s2 = {e.node[1],e.node[2],e.node[4]};
-		// 				set<int> s3 = {e.node[0],e.node[3],e.node[4]};
-		// 				set<int> s4 = {e.node[0],e.node[1],e.node[4]};
-		// 				set<int> s5 = {e.node[2],e.node[3],e.node[4]};
-		// 				f.push_back(s1);
-		// 				f.push_back(s2);
-		// 				f.push_back(s3);
-		// 				f.push_back(s4);
-		// 				f.push_back(s5);
-		// 		  }				
+		case 14 : {
+						set<long long int> s1 = {e.node[0],e.node[1],e.node[2],e.node[3]};
+						set<long long int> s2 = {e.node[1],e.node[2],e.node[4]};
+						set<long long int> s3 = {e.node[0],e.node[3],e.node[4]};
+						set<long long int> s4 = {e.node[0],e.node[1],e.node[4]};
+						set<long long int> s5 = {e.node[2],e.node[3],e.node[4]};
+						f.push_back(s1);
+						f.push_back(s2);
+						f.push_back(s3);
+						f.push_back(s4);
+						f.push_back(s5);
+				  }				
 
 
 
