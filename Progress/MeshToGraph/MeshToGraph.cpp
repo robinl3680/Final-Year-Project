@@ -10,14 +10,15 @@ struct elements	//Structure for the elements
 };
 
 
-void makeFace( vector< set<int> > &f , elements &e){ 
+void makeFace( vector< set<long long int> > &f , elements &e){ 
 //Function that make faces for each element
 
 	switch( e.type ){
 
+
 		case 10	:	for(int i = 0 ; i < 4 ; i++){
 
-						set<int> n;
+						set<long long int> n;
 
 						n.insert(e.node[i]);
 						n.insert(e.node[(i+1)%4]);
@@ -25,8 +26,35 @@ void makeFace( vector< set<int> > &f , elements &e){
 						f.push_back(n);
 
 					} 
-
 					break;
+		case 11 :	 {
+						set<long long int> s1 = {e.node[0],e.node[1],e.node[3],e.node[2]};
+						set<long long int> s2 = {e.node[1],e.node[5],e.node[7],e.node[3]};
+						set<long long int> s3 = {e.node[2],e.node[3],e.node[7],e.node[6]};
+						set<long long int> s4 = {e.node[4],e.node[5],e.node[7],e.node[6]};
+						set<long long int> s5 = {e.node[0],e.node[2],e.node[6],e.node[4]};
+						set<long long int> s6 = {e.node[0],e.node[1],e.node[5],e.node[4]};
+						f.push_back(s1);
+						f.push_back(s2);
+						f.push_back(s3);
+						f.push_back(s4);
+						f.push_back(s5);
+						f.push_back(s6);
+
+					 }
+
+		// case 14 : {
+		// 				set<int> s1 = {e.node[0],e.node[1],e.node[2],e.node[3]};
+		// 				set<int> s2 = {e.node[1],e.node[2],e.node[4]};
+		// 				set<int> s3 = {e.node[0],e.node[3],e.node[4]};
+		// 				set<int> s4 = {e.node[0],e.node[1],e.node[4]};
+		// 				set<int> s5 = {e.node[2],e.node[3],e.node[4]};
+		// 				f.push_back(s1);
+		// 				f.push_back(s2);
+		// 				f.push_back(s3);
+		// 				f.push_back(s4);
+		// 				f.push_back(s5);
+		// 		  }				
 
 
 
@@ -79,7 +107,7 @@ int main(int argv, char **args)
 	}
 
 
-	map< set<int> , int> faceID; //Map to store faces and curresponding index in edges array(indexing start from 1).
+	map< set<long long int> , int> faceID; //Map to store faces and curresponding index in edges array(indexing start from 1).
 	vector< pair<int , int> > edges(1 , {-1,-1}); // To store two elements of each face.
 
 	int faceCount = 1;
@@ -91,7 +119,7 @@ int main(int argv, char **args)
 
 		//cout << i << endl;
 
-		vector< set<int> > f; //vector that store faces as set of nodes.
+		vector< set<long long int> > f; //vector that store faces as set of nodes.
 
 		makeFace(f , e); //returns faces that makes the current element.
 
