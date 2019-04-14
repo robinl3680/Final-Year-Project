@@ -42,6 +42,7 @@ void makeFace( vector< set<long long int> > &f , elements &e){
 						f.push_back(s6);
 
 					 }
+					 break;
 
 		case 14 : {
 						set<long long int> s1 = {e.node[0],e.node[1],e.node[2],e.node[3]};
@@ -54,7 +55,8 @@ void makeFace( vector< set<long long int> > &f , elements &e){
 						f.push_back(s3);
 						f.push_back(s4);
 						f.push_back(s5);
-				  }				
+				  }	
+				  break;			
 
 
 
@@ -72,7 +74,7 @@ int findType(int element_type)
 		case 5: return 3;
 		case 9: return 4;
 		case 10:return 4;
-		case 12:return 8;
+		case 11:return 8;
 		case 13:return 6;
 		case 14:return 5;
 		default: return 0;
