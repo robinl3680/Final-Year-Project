@@ -67,7 +67,7 @@ int main(int args, char **argv)
 
 
 
-    int count_all = 1;
+    int count_all = 0;
 	int total_count[CORES*CORES];
 	for(int i = 0; i < CORES * CORES; i++)
 	{
@@ -104,7 +104,7 @@ int main(int args, char **argv)
 
 
 			
-
+			count_all++;
 			
 			getline(graph_file,gph); //Line by line reading graph.
 			getline(partition_file,part); //Line by line reading partition.
@@ -130,7 +130,7 @@ int main(int args, char **argv)
 
 			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD);
 			
-			count_all+=8; //Send each vertex of partition to curresponding core.
+			 //Send each vertex of partition to curresponding core.
 
 		}
 
@@ -140,7 +140,7 @@ int main(int args, char **argv)
 		for(int i = 0; i < CORES-1; i++)
 		{
 			MPI_Send(&v_node,1,mpi_vertex_type,i+1,0,MPI_COMM_WORLD);
-			count_all+=8;
+			
 		}
 
 		//To send data of ghost vertices.
@@ -152,16 +152,16 @@ int main(int args, char **argv)
 		{
 
 			int ierr = MPI_Recv(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD , &status);	//Receiving request from each of the other core.
-
+			count_all++;
 			if(ierr == MPI_SUCCESS)
 			{
-				count_all++;
+				
 
 				for(int j = 1 ; j <= R[0] ; j++)
 					R[j] = vertex_data[R[j]];	//Storing the vertex data of ghost.
-
+				count_all++;
 				MPI_Send(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD);	//Send back the response.
-				count_all+=8;
+				
 			}
 
 		}
@@ -188,7 +188,7 @@ int main(int args, char **argv)
 
 			if(ierr == MPI_SUCCESS)
 			{
-				count_all+=8;
+				count_all++;
 				if(v_node.data == -1)
 					break;
 
@@ -232,7 +232,7 @@ int main(int args, char **argv)
 
 		if(ierr == MPI_SUCCESS){
 
-			count_all+=8;
+			count_all++;
 
 			int i = 1;
 
@@ -268,12 +268,14 @@ int main(int args, char **argv)
 
 			if(rank == 1)
 			{
-				// cout << " Finally i received ";
+				cout << " Finally i received ";
 				for(auto it : total_count)
 				{
 					sum += it;
+					cout << it << " ";
 				}
-				cout << "total count = " << sum << endl;
+				cout << endl;
+				// cout << "total count = " << sum << endl;
 				cout << "time difference = " << t2-t1 << endl;
 			}
 	
