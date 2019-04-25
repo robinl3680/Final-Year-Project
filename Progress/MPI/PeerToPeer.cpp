@@ -251,7 +251,7 @@ int main(int args, char **argv)
 					
 								if(ierr == MPI_SUCCESS)
 								{
-									count_all++;
+									// count_all++;
 
 											// cout << "I am " << rank << " received ";
 											for(int j = 1 ; j <= sample_recv[0]; j++)
@@ -291,7 +291,7 @@ int main(int args, char **argv)
 
 						if(ie == MPI_SUCCESS)
 						{
-							count_all++;
+							// count_all++;
 									cout << "I am " << rank << " have ";
 									for(int j = 1 ; j <= data_recv[0]; j++)
 									{
@@ -314,12 +314,12 @@ int main(int args, char **argv)
 
 			if(rank == 1)
 			{
-			// 	cout << " Finally i received ";
-			// 	for(auto it : total_count)
-			// 	{
-			// 		cout << it << " ";
-			// 	}
-			// 	cout << endl;
+				cout << " Finally i received ";
+				for(auto it : total_count)
+				{
+					cout << it << " ";
+				}
+				cout << endl;
 				cout << "time difference is = " << t2-t1 << endl;
 			}
 

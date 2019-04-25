@@ -98,13 +98,6 @@ int main(int args, char **argv)
 			int temp1;
 			int temp2;
 
-
-
-
-
-
-			
-			count_all++;
 			
 			getline(graph_file,gph); //Line by line reading graph.
 			getline(partition_file,part); //Line by line reading partition.
@@ -127,6 +120,8 @@ int main(int args, char **argv)
 				v_node.adj[v_node.adj_size] = temp2;
 				v_node.adj_size++;						//Storing the adjacency list.
 			}
+
+			count_all++;
 
 			MPI_Send(&v_node,1,mpi_vertex_type,partition[i]+1,0,MPI_COMM_WORLD);
 			
@@ -152,14 +147,18 @@ int main(int args, char **argv)
 		{
 
 			int ierr = MPI_Recv(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD , &status);	//Receiving request from each of the other core.
+			
 			count_all++;
+			
 			if(ierr == MPI_SUCCESS)
 			{
 				
 
 				for(int j = 1 ; j <= R[0] ; j++)
 					R[j] = vertex_data[R[j]];	//Storing the vertex data of ghost.
+				
 				count_all++;
+				
 				MPI_Send(&R , GHOST_MAX+1 , MPI_INT , i , 0 , MPI_COMM_WORLD);	//Send back the response.
 				
 			}
@@ -183,12 +182,13 @@ int main(int args, char **argv)
 		MPI_Status status;
 		while(1)
 		{
-			
+			count_all++;
+
 			int ierr = MPI_Recv(&v_node,1,mpi_vertex_type,0,0,MPI_COMM_WORLD,&status); //Each core receiving the vertex details.
 
 			if(ierr == MPI_SUCCESS)
 			{
-				count_all++;
+				
 				if(v_node.data == -1)
 					break;
 
@@ -219,20 +219,32 @@ int main(int args, char **argv)
 		int R[GHOST_MAX+1];
 		int i = 1;
 
+
+
+
+		cout << " am " << rank << "has " << ghosts.size() << endl;
+
+
+
+
+
 		R[0] = ghosts.size();	//Request-array[0] stores sizeof ghosts.
 
 		for(auto it: ghosts)
 			R[i++] = it;	//Filling the array with ghosts.
 
+
+		count_all++;
+
 		MPI_Send(&R , GHOST_MAX+1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD);	//Sending request for getting ghost vertex data.
 
+		
 		count_all++;
 
 		int ierr = MPI_Recv(&R , GHOST_MAX+1 , MPI_INT , 0 , 0 , MPI_COMM_WORLD , &status); //Receiving ghost data.
 
 		if(ierr == MPI_SUCCESS){
 
-			count_all++;
 
 			int i = 1;
 
@@ -272,9 +284,9 @@ int main(int args, char **argv)
 				for(auto it : total_count)
 				{
 					sum += it;
-					cout << it << " ";
+					// cout << it << " ";
 				}
-				cout << endl;
+				cout << sum << endl;
 				// cout << "total count = " << sum << endl;
 				cout << "time difference = " << t2-t1 << endl;
 			}
