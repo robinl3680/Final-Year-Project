@@ -280,15 +280,14 @@ int main(int args, char **argv)
 
 			if(rank == 1)
 			{
-				cout << " Finally i received ";
+				cout << " Finally total message involved ";
 				for(auto it : total_count)
 				{
 					sum += it;
 					// cout << it << " ";
 				}
 				cout << sum << endl;
-				// cout << "total count = " << sum << endl;
-				cout << "time difference = " << t2-t1 << endl;
+// 				cout << "time difference = " << t2-t1 << endl;
 			}
 	
 
